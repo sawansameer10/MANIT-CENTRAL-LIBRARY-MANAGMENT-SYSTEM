@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MANIT Central Library Management System</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --maroon:#2d0732;--maroon-hover:#9b2438;--maroon-light:rgba(123,28,46,0.1);
+  --gold:#C89B3C;--gold-light:rgba(200,155,60,0.12);
+  --sidebar-w:210px;
+  --r-md:8px;--r-lg:12px;--r-xl:16px;
+  --fs-xs:11px;--fs-sm:12px;--fs-base:13px;--fs-md:14px;--fs-lg:16px;
+  --transition:0.15s ease;
+  --color-background-primary:#ffffff;
+  --color-background-secondary:#f5f5f4;
+  --color-background-tertiary:#f0efed;
+  --color-background-success:#eaf3de;
+  --color-background-warning:#faeeda;
+  --color-background-danger:#fcebeb;
+  --color-background-info:#e6f1fb;
+  --color-text-primary:#1a1a18;
+  --color-text-secondary:#5f5e5a;
+  --color-text-tertiary:#888780;
+  --color-text-success:#3b6d11;
+  --color-text-warning:#854f0b;
+  --color-text-danger:#a32d2d;
+  --color-text-info:#185fa5;
+  --color-border-tertiary:rgba(0,0,0,0.08);
+  --color-border-secondary:rgba(0,0,0,0.15);
+  --color-border-success:rgba(59,109,17,0.3);
+  --color-border-warning:rgba(133,79,11,0.3);
+  --color-border-danger:rgba(163,45,45,0.3);
+  --color-border-info:rgba(24,95,165,0.3);
+  --font-sans:system-ui,-apple-system,sans-serif;
+  --font-mono:ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --color-background-primary:#1c1c1a;
+    --color-background-secondary:#252523;
+    --color-background-tertiary:#2c2c2a;
+    --color-background-success:#173404;
+    --color-background-warning:#412402;
+    --color-background-danger:#501313;
+    --color-background-info:#042c53;
+    --color-text-primary:#f0efed;
+    --color-text-secondary:#b4b2a9;
+    --color-text-tertiary:#888780;
+    --color-text-success:#c0dd97;
+    --color-text-warning:#fac775;
+    --color-text-danger:#f09595;
+    --color-text-info:#b5d4f4;
+    --color-border-tertiary:rgba(255,255,255,0.08);
+    --color-border-secondary:rgba(255,255,255,0.15);
+    --color-border-success:rgba(192,221,151,0.25);
+    --color-border-warning:rgba(250,199,117,0.25);
+    --color-border-danger:rgba(240,149,149,0.25);
+    --color-border-info:rgba(181,212,244,0.25);
+  }
+}
+body{font-family:var(--font-sans);font-size:var(--fs-base);color:var(--color-text-primary);background:var(--color-background-tertiary);line-height:1.5;}
+#app{display:flex;min-height:100vh;border-radius:var(--r-xl);overflow:hidden;border:0.5px solid var(--color-border-tertiary);}
+
+#sidebar{width:var(--sidebar-w);background:var(--maroon);display:flex;flex-direction:column;flex-shrink:0;position:relative;}
+#sidebar::after{content:'';position:absolute;top:0;right:0;width:0.5px;height:100%;background:rgba(255,255,255,0.08);}
+.sb-brand{padding:18px 16px 14px;border-bottom:0.5px solid rgba(255,255,255,0.1);}
+.sb-tag{font-size:var(--fs-xs);font-weight:500;color:rgba(255,255,255,0.45);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;}
+.sb-name{font-size:15px;font-weight:500;color:#fff;line-height:1.25;}
+.sb-sub{font-size:var(--fs-xs);color:rgba(255,255,255,0.4);margin-top:3px;}
+.sb-nav{flex:1;padding:8px 0;overflow-y:auto;}
+.nav-section{padding:10px 16px 4px;font-size:10px;font-weight:500;color:rgba(255,255,255,0.3);letter-spacing:0.12em;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;font-size:var(--fs-base);color:rgba(255,255,255,0.65);transition:background var(--transition),color var(--transition);border-left:2px solid transparent;margin:1px 0;}
+.nav-item:hover{background:rgba(255,255,255,0.07);color:#fff;}
+.nav-item.active{background:rgba(255,255,255,0.12);color:#fff;border-left:2px solid var(--gold);}
+.nav-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:rgba(200,155,60,0.25);color:var(--gold);font-size:10px;font-weight:500;padding:1px 6px;border-radius:99px;}
+.sb-footer{padding:12px 16px;border-top:0.5px solid rgba(255,255,255,0.08);font-size:10px;color:rgba(255,255,255,0.3);display:flex;align-items:center;gap:6px;}
+.status-dot{width:6px;height:6px;border-radius:50%;background:#1D9E75;flex-shrink:0;}
+
+#main{flex:1;overflow-y:auto;display:flex;flex-direction:column;background:var(--color-background-tertiary);min-width:0;}
+.topbar{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);flex-shrink:0;position:sticky;top:0;z-index:10;}
+.topbar-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
+.page-icon{width:30px;height:30px;border-radius:var(--r-md);background:var(--maroon-light);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.topbar-title{font-size:15px;font-weight:500;color:var(--color-text-primary);}
+.search-wrap{display:flex;align-items:center;gap:8px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);border-radius:var(--r-md);padding:6px 12px;flex:1;max-width:260px;transition:border-color var(--transition);}
+.search-wrap:focus-within{border-color:var(--maroon);box-shadow:0 0 0 2px var(--maroon-light);}
+.search-wrap input{border:none;background:transparent;outline:none;font-size:var(--fs-sm);color:var(--color-text-primary);width:100%;}
+.search-wrap input::placeholder{color:var(--color-text-tertiary);}
+.btn{padding:7px 14px;border:0.5px solid var(--color-border-secondary);border-radius:var(--r-md);background:transparent;cursor:pointer;font-size:var(--fs-sm);color:var(--color-text-primary);transition:all var(--transition);white-space:nowrap;font-family:inherit;display:inline-flex;align-items:center;gap:6px;}
+.btn:hover{background:var(--color-background-secondary);}
+.btn:active{transform:scale(0.98);}
+.btn-primary{background:var(--maroon);color:#fff;border-color:var(--maroon);}
+.btn-primary:hover{background:var(--maroon-hover);}
+.btn-sm{padding:4px 10px;font-size:11px;}
+.btn-danger{color:var(--color-text-danger);border-color:var(--color-border-danger);}
+.btn-danger:hover{background:var(--color-background-danger);}
+.btn-success{color:var(--color-text-success);border-color:var(--color-border-success);}
+.btn-success:hover{background:var(--color-background-success);}
+
+.content{padding:18px;flex:1;display:flex;flex-direction:column;gap:16px;}
+.section{display:none;flex-direction:column;gap:16px;}
+.section.active{display:flex;}
+
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;}
+.stat-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--r-lg);padding:14px 16px;transition:border-color var(--transition);}
+.stat-card:hover{border-color:var(--color-border-secondary);}
+.stat-label{font-size:var(--fs-xs);color:var(--color-text-secondary);font-weight:500;letter-spacing:0.03em;margin-bottom:6px;}
+.stat-value{font-size:26px;font-weight:500;color:var(--color-text-primary);line-height:1;}
+.stat-sub{font-size:var(--fs-xs);color:var(--color-text-tertiary);margin-top:5px;}
+
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--r-lg);overflow:hidden;}
+.card-header{padding:12px 16px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.card-title{font-size:var(--fs-sm);font-weight:500;color:var(--color-text-primary);}
+.card-meta{font-size:var(--fs-xs);color:var(--color-text-secondary);}
+
+table{width:100%;border-collapse:collapse;font-size:var(--fs-base);}
+th{text-align:left;padding:9px 16px;font-size:10px;font-weight:500;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);letter-spacing:0.06em;text-transform:uppercase;white-space:nowrap;}
+td{padding:10px 16px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tbody tr{transition:background var(--transition);}
+tbody tr:hover td{background:var(--color-background-secondary);}
+.cell-mono{font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--color-text-secondary);}
+.cell-title{font-weight:500;font-size:var(--fs-base);}
+.cell-sub{font-size:var(--fs-xs);color:var(--color-text-secondary);margin-top:1px;}
+
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:500;white-space:nowrap;}
+.badge-success{background:var(--color-background-success);color:var(--color-text-success);}
+.badge-warning{background:var(--color-background-warning);color:var(--color-text-warning);}
+.badge-danger{background:var(--color-background-danger);color:var(--color-text-danger);}
+.badge-info{background:var(--color-background-info);color:var(--color-text-info);}
+.badge-neutral{background:var(--color-background-secondary);color:var(--color-text-secondary);border:0.5px solid var(--color-border-tertiary);}
+.badge-maroon{background:var(--maroon-light);color:var(--maroon);}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;}
+.filter-bar select{padding:6px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--r-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:var(--fs-sm);font-family:inherit;cursor:pointer;outline:none;}
+.filter-bar select:focus{border-color:var(--maroon);}
+
+.activity-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary);}
+.activity-item:last-child{border-bottom:none;}
+.activity-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.activity-dot.issue{background:#C89B3C;}
+.activity-dot.return{background:#1D9E75;}
+.activity-dot.add{background:#378ADD;}
+.activity-dot.fine{background:#E24B4A;}
+.activity-text{font-size:var(--fs-base);color:var(--color-text-primary);line-height:1.4;}
+.activity-time{font-size:var(--fs-xs);color:var(--color-text-tertiary);margin-top:2px;}
+
+.form-group{margin-bottom:12px;}
+.form-group label{display:block;font-size:var(--fs-xs);font-weight:500;color:var(--color-text-secondary);margin-bottom:5px;letter-spacing:0.03em;}
+.form-group input,.form-group select{width:100%;padding:8px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--r-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:var(--fs-base);font-family:inherit;outline:none;transition:border-color var(--transition);}
+.form-group input:focus,.form-group select:focus{border-color:var(--maroon);box-shadow:0 0 0 2px var(--maroon-light);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--color-background-primary);border-radius:var(--r-xl);border:0.5px solid var(--color-border-tertiary);padding:24px;width:460px;max-width:95vw;max-height:90vh;overflow-y:auto;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.modal-title{font-size:15px;font-weight:500;color:var(--color-text-primary);}
+.modal-close{width:28px;height:28px;border-radius:var(--r-md);background:var(--color-background-secondary);border:none;cursor:pointer;color:var(--color-text-secondary);font-size:16px;display:flex;align-items:center;justify-content:center;}
+.modal-close:hover{background:var(--color-background-tertiary);color:var(--color-text-primary);}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:0.5px solid var(--color-border-tertiary);}
+
+.issue-return-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.issue-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--r-lg);overflow:hidden;}
+.issue-card-header{padding:12px 16px;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);}
+.issue-card-body{padding:16px;}
+
+.bar-wrap{margin-bottom:10px;}
+.bar-label{display:flex;justify-content:space-between;font-size:var(--fs-xs);margin-bottom:4px;color:var(--color-text-secondary);}
+.bar-label span:first-child{color:var(--color-text-primary);}
+.bar-track{background:var(--color-background-secondary);border-radius:4px;height:6px;overflow:hidden;border:0.5px solid var(--color-border-tertiary);}
+.bar-fill{height:100%;border-radius:4px;transition:width 0.4s ease;}
+
+.toast{position:fixed;bottom:20px;right:20px;padding:10px 16px;border-radius:var(--r-md);font-size:var(--fs-base);z-index:999;opacity:0;transition:all 0.3s;pointer-events:none;border:0.5px solid;display:flex;align-items:center;gap:8px;max-width:300px;}
+.toast.show{opacity:1;}
+.toast-success{background:var(--color-background-success);color:var(--color-text-success);border-color:var(--color-border-success);}
+.toast-danger{background:var(--color-background-danger);color:var(--color-text-danger);border-color:var(--color-border-danger);}
+.toast-warning{background:var(--color-background-warning);color:var(--color-text-warning);border-color:var(--color-border-warning);}
+
+.member-avatar{width:32px;height:32px;border-radius:50%;background:var(--maroon-light);display:flex;align-items:center;justify-content:center;font-size:var(--fs-xs);font-weight:500;color:var(--maroon);flex-shrink:0;}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:99px;font-size:var(--fs-xs);color:var(--color-text-secondary);}
+.empty-state{text-align:center;padding:36px;color:var(--color-text-tertiary);font-size:var(--fs-md);}
+
+@media(max-width:600px){
+  #sidebar{width:52px;}
+  .sb-name,.sb-sub,.sb-tag,.nav-item span:last-child,.nav-badge,.sb-footer span{display:none;}
+  .nav-item{justify-content:center;padding:12px;}
+  .two-col,.issue-return-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">MANIT Bhopal Central Library Management System</h2>
+
+<div id="app">
+  <div id="sidebar">
+    <div class="sb-brand">
+      <div class="sb-tag">MANIT Bhopal</div>
+      <div class="sb-name">Central Library</div>
+      <div class="sb-sub">Management System</div>
+    </div>
+    <nav class="sb-nav">
+      <div class="nav-section">Main</div>
+      <div class="nav-item active" data-section="dashboard" onclick="navigate('dashboard')">
+        <span class="nav-icon">⊡</span><span>Dashboard</span>
+      </div>
+      <div class="nav-section">Catalogue</div>
+      <div class="nav-item" data-section="books" onclick="navigate('books')">
+        <span class="nav-icon">◫</span><span>Books</span>
+      </div>
+      <div class="nav-item" data-section="members" onclick="navigate('members')">
+        <span class="nav-icon">◎</span><span>Members</span>
+      </div>
+      <div class="nav-section">Transactions</div>
+      <div class="nav-item" data-section="issues" onclick="navigate('issues')">
+        <span class="nav-icon">⇄</span><span>Issue / Return</span>
+      </div>
+      <div class="nav-item" data-section="fines" onclick="navigate('fines')">
+        <span class="nav-icon">₹</span><span>Fines</span><span class="nav-badge" id="fine-nav-badge">2</span>
+      </div>
+      <div class="nav-section">Analytics</div>
+      <div class="nav-item" data-section="reports" onclick="navigate('reports')">
+        <span class="nav-icon">≡</span><span>Reports</span>
+      </div>
+    </nav>
+    <div class="sb-footer">
+      <div class="status-dot"></div>
+      <span>v2.4 · 2025–26</span>
+    </div>
+  </div>
+
+  <div id="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="page-icon" id="page-icon">⊡</div>
+        <div class="topbar-title" id="page-title">Dashboard</div>
+      </div>
+      <div class="search-wrap">
+        <span style="color:var(--color-text-tertiary);font-size:12px;">⌕</span>
+        <input id="global-search" placeholder="Search books, members…" oninput="globalSearch(this.value)">
+      </div>
+      <button class="btn btn-primary" id="topbar-action" onclick="topbarAction()">+ Add Book</button>
+    </div>
+
+    <div class="content">
+
+      <div id="section-dashboard" class="section active">
+        <div class="stat-grid" id="stat-grid"></div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Recent Activity</span>
+              <span class="chip">Live</span>
+            </div>
+            <div style="padding:8px 16px;" id="activity-log"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Overdue Returns</span>
+              <span class="badge badge-danger" id="overdue-count">0</span>
+            </div>
+            <table>
+              <thead><tr><th>Member</th><th>Book</th><th>Due</th></tr></thead>
+              <tbody id="overdue-table"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Popular Books This Month</span>
+            <span class="card-meta">by issue count</span>
+          </div>
+          <table>
+            <thead><tr><th>Title</th><th>Author</th><th>Genre</th><th>Issues</th></tr></thead>
+            <tbody id="popular-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="section-books" class="section">
+        <div class="filter-bar">
+          <select id="book-genre-filter" onchange="renderBooks()">
+            <option value="">All Genres</option>
+            <option>Computer Science</option><option>Mathematics</option><option>Physics</option>
+            <option>Electronics</option><option>Mechanical</option><option>Civil</option>
+            <option>Chemistry</option><option>Management</option><option>Literature</option>
+          </select>
+          <select id="book-status-filter" onchange="renderBooks()">
+            <option value="">All Status</option>
+            <option>Available</option><option>Issued</option>
+          </select>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Book Catalogue</span>
+            <span class="card-meta" id="book-count-label"></span>
+          </div>
+          <table>
+            <thead><tr><th>Acc. No.</th><th>Title</th><th>Author</th><th>Genre</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="books-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="section-members" class="section">
+        <div class="filter-bar">
+          <select id="member-type-filter" onchange="renderMembers()">
+            <option value="">All Types</option>
+            <option>Student</option><option>Faculty</option><option>Staff</option>
+          </select>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Library Members</span>
+            <span class="card-meta" id="member-count-label"></span>
+          </div>
+          <table>
+            <thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Department</th><th>Issued</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="members-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="section-issues" class="section">
+        <div class="issue-return-grid">
+          <div class="issue-card">
+            <div class="issue-card-header"><div class="card-title">Issue Book</div></div>
+            <div class="issue-card-body">
+              <div class="form-group"><label>Member ID</label><input id="issue-member" placeholder="e.g. STU-2024-001" list="member-list"></div>
+              <div class="form-group"><label>Accession No.</label><input id="issue-book" placeholder="e.g. ACC-1001" list="book-list"></div>
+              <datalist id="member-list"></datalist>
+              <datalist id="book-list"></datalist>
+              <button class="btn btn-primary" onclick="issueBook()" style="width:100%;justify-content:center;">Issue Book →</button>
+            </div>
+          </div>
+          <div class="issue-card">
+            <div class="issue-card-header"><div class="card-title">Return Book</div></div>
+            <div class="issue-card-body">
+              <div class="form-group"><label>Accession No.</label><input id="return-book" placeholder="e.g. ACC-1001" list="book-list2"></div>
+              <datalist id="book-list2"></datalist>
+              <div id="return-info" style="min-height:22px;font-size:var(--fs-sm);color:var(--color-text-secondary);margin-bottom:12px;"></div>
+              <button class="btn btn-primary" onclick="returnBook()" style="width:100%;justify-content:center;">Return Book ↩</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Active Issues</span>
+            <span class="card-meta" id="issue-count-label"></span>
+          </div>
+          <table>
+            <thead><tr><th>Issue ID</th><th>Member</th><th>Book</th><th>Issued</th><th>Due Date</th><th>Status</th></tr></thead>
+            <tbody id="issues-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="section-fines" class="section">
+        <div class="stat-grid" id="fine-stats"></div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Fine Records</span></div>
+          <table>
+            <thead><tr><th>Member</th><th>Book</th><th>Days Overdue</th><th>Fine (₹)</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="fines-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="section-reports" class="section">
+        <div class="stat-grid" id="report-stats"></div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Genre Distribution</span></div>
+            <div style="padding:16px;" id="genre-dist"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Member Breakdown</span></div>
+            <div style="padding:16px;" id="member-dist"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Issue History (Last 7 Days)</span></div>
+          <table>
+            <thead><tr><th>Date</th><th>Issues</th><th>Returns</th><th>Fines Collected (₹)</th></tr></thead>
+            <tbody id="history-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Book Modal -->
+<div class="modal-overlay" id="book-modal" onclick="outsideClose(event,'book-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title" id="book-modal-title">Add New Book</div>
+      <button class="modal-close" onclick="closeModal('book-modal')">✕</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Accession No.</label><input id="bk-acc" placeholder="ACC-1001"></div>
+      <div class="form-group"><label>ISBN</label><input id="bk-isbn" placeholder="978-..."></div>
+    </div>
+    <div class="form-group"><label>Title</label><input id="bk-title" placeholder="Book title"></div>
+    <div class="form-group"><label>Author</label><input id="bk-author" placeholder="Author name"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Genre</label>
+        <select id="bk-genre">
+          <option>Computer Science</option><option>Mathematics</option><option>Physics</option>
+          <option>Electronics</option><option>Mechanical</option><option>Civil</option>
+          <option>Chemistry</option><option>Management</option><option>Literature</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Year</label><input id="bk-year" type="number" placeholder="2024"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Publisher</label><input id="bk-pub" placeholder="Publisher"></div>
+      <div class="form-group"><label>Copies</label><input id="bk-copies" type="number" value="1" min="1"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('book-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBook()">Save Book</button>
+    </div>
+  </div>
+</div>
+
+<!-- Member Modal -->
+<div class="modal-overlay" id="member-modal" onclick="outsideClose(event,'member-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title" id="member-modal-title">Add New Member</div>
+      <button class="modal-close" onclick="closeModal('member-modal')">✕</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Member ID</label><input id="mb-id" placeholder="STU-2024-001"></div>
+      <div class="form-group"><label>Type</label>
+        <select id="mb-type"><option>Student</option><option>Faculty</option><option>Staff</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>First Name</label><input id="mb-fname" placeholder="First name"></div>
+      <div class="form-group"><label>Last Name</label><input id="mb-lname" placeholder="Last name"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Department</label>
+        <select id="mb-dept">
+          <option>Computer Science</option><option>Mathematics</option><option>Physics</option>
+          <option>Electronics</option><option>Mechanical</option><option>Civil</option>
+          <option>Chemistry</option><option>Management</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Email</label><input id="mb-email" placeholder="name@manit.ac.in"></div>
+    </div>
+    <div class="form-group"><label>Phone</label><input id="mb-phone" placeholder="10-digit number"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('member-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMember()">Save Member</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let editingBook=null,editingMember=null;
+const FINE_PER_DAY=2;
+const LOAN_DAYS={Student:14,Faculty:30,Staff:21};
+
+let books=[
+  {acc:'ACC-1001',isbn:'978-0131103627',title:'The C Programming Language',author:'Kernighan & Ritchie',genre:'Computer Science',year:1988,publisher:'Prentice Hall',copies:3,issued:2},
+  {acc:'ACC-1002',isbn:'978-0262033848',title:'Introduction to Algorithms',author:'CLRS',genre:'Computer Science',year:2009,publisher:'MIT Press',copies:2,issued:2},
+  {acc:'ACC-1003',isbn:'978-0471488484',title:'Engineering Mathematics',author:'K.A. Stroud',genre:'Mathematics',year:2013,publisher:'Palgrave',copies:4,issued:1},
+  {acc:'ACC-1004',isbn:'978-8131702536',title:'Signals and Systems',author:'Oppenheim & Willsky',genre:'Electronics',year:2014,publisher:'Pearson',copies:2,issued:0},
+  {acc:'ACC-1005',isbn:'978-0470458365',title:'Fluid Mechanics',author:'Frank White',genre:'Mechanical',year:2010,publisher:'McGraw-Hill',copies:3,issued:1},
+  {acc:'ACC-1006',isbn:'978-0071311403',title:'Strength of Materials',author:'R.K. Bansal',genre:'Civil',year:2019,publisher:'Laxmi Pub.',copies:5,issued:3},
+  {acc:'ACC-1007',isbn:'978-0198534341',title:'University Chemistry',author:'Atkins & Jones',genre:'Chemistry',year:2018,publisher:'OUP',copies:2,issued:2},
+  {acc:'ACC-1008',isbn:'978-0132350884',title:'Clean Code',author:'Robert C. Martin',genre:'Computer Science',year:2008,publisher:'Prentice Hall',copies:2,issued:1},
+  {acc:'ACC-1009',isbn:'978-1617291913',title:'Deep Learning',author:'Goodfellow et al.',genre:'Computer Science',year:2016,publisher:'MIT Press',copies:1,issued:1},
+  {acc:'ACC-1010',isbn:'978-0070671553',title:'Higher Engineering Mathematics',author:'B.S. Grewal',genre:'Mathematics',year:2020,publisher:'Khanna Pub.',copies:6,issued:2},
+];
+
+let members=[
+  {id:'STU-2024-001',fname:'Riya',lname:'Sharma',type:'Student',dept:'Computer Science',email:'riya.sharma@manit.ac.in',phone:'9876543210',active:true},
+  {id:'STU-2024-002',fname:'Arjun',lname:'Verma',type:'Student',dept:'Electronics',email:'arjun.verma@manit.ac.in',phone:'9871234560',active:true},
+  {id:'FAC-2021-001',fname:'Dr. Priya',lname:'Mehta',type:'Faculty',dept:'Mathematics',email:'priya.mehta@manit.ac.in',phone:'9845001234',active:true},
+  {id:'STU-2023-003',fname:'Kiran',lname:'Singh',type:'Student',dept:'Mechanical',email:'kiran.singh@manit.ac.in',phone:'9823456780',active:true},
+  {id:'FAC-2019-002',fname:'Prof. Suresh',lname:'Kumar',type:'Faculty',dept:'Civil',email:'suresh.kumar@manit.ac.in',phone:'9801234567',active:true},
+  {id:'STA-2020-001',fname:'Ramesh',lname:'Patel',type:'Staff',dept:'Other',email:'ramesh.patel@manit.ac.in',phone:'9812345678',active:true},
+];
+
+function daysAgo(n){const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().split('T')[0];}
+function daysFromNow(n){const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().split('T')[0];}
+function daysDiff(a,b){return Math.round((new Date(b)-new Date(a))/86400000);}
+function today(){return new Date().toISOString().split('T')[0];}
+
+let issues=[
+  {id:'ISS-001',memberId:'STU-2024-001',bookAcc:'ACC-1002',issued:daysAgo(10),due:daysFromNow(4),returned:null},
+  {id:'ISS-002',memberId:'FAC-2021-001',bookAcc:'ACC-1009',issued:daysAgo(25),due:daysAgo(5),returned:null},
+  {id:'ISS-003',memberId:'STU-2023-003',bookAcc:'ACC-1005',issued:daysAgo(8),due:daysFromNow(6),returned:null},
+  {id:'ISS-004',memberId:'STU-2024-002',bookAcc:'ACC-1007',issued:daysAgo(20),due:daysAgo(3),returned:null},
+  {id:'ISS-005',memberId:'STU-2024-001',bookAcc:'ACC-1008',issued:daysAgo(5),due:daysFromNow(9),returned:null},
+];
+
+let fines=[
+  {id:'FIN-001',issueId:'ISS-002',memberId:'FAC-2021-001',bookAcc:'ACC-1009',daysOverdue:5,amount:10,paid:false},
+  {id:'FIN-002',issueId:'ISS-004',memberId:'STU-2024-002',bookAcc:'ACC-1007',daysOverdue:3,amount:6,paid:false},
+];
+
+let activityLog=[
+  {type:'issue',text:'ACC-1008 issued to Riya Sharma (STU-2024-001)',time:'2 hours ago'},
+  {type:'return',text:'ACC-1003 returned by Kiran Singh (STU-2023-003)',time:'5 hours ago'},
+  {type:'add',text:'New book "Clean Code" (ACC-1008) added',time:'1 day ago'},
+  {type:'fine',text:'Fine of ₹10 raised for Dr. Priya Mehta',time:'1 day ago'},
+  {type:'issue',text:'ACC-1007 issued to Arjun Verma',time:'2 days ago'},
+];
+
+let currentSection='dashboard';
+const PAGE_META={
+  dashboard:{title:'Dashboard',icon:'⊡',action:'+ Add Book'},
+  books:{title:'Book Catalogue',icon:'◫',action:'+ Add Book'},
+  members:{title:'Members',icon:'◎',action:'+ Add Member'},
+  issues:{title:'Issue & Return',icon:'⇄',action:''},
+  fines:{title:'Fine Management',icon:'₹',action:''},
+  reports:{title:'Reports & Analytics',icon:'≡',action:''},
+};
+
+function navigate(section){
+  currentSection=section;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.section===section));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('section-'+section).classList.add('active');
+  const m=PAGE_META[section];
+  document.getElementById('page-title').textContent=m.title;
+  document.getElementById('page-icon').textContent=m.icon;
+  const btn=document.getElementById('topbar-action');
+  btn.textContent=m.action;
+  btn.style.display=m.action?'':'none';
+  renderSection(section);
+}
+
+function topbarAction(){
+  if(currentSection==='members')openMemberModal();
+  else openBookModal();
+}
+
+function renderSection(s){
+  if(s==='dashboard')renderDashboard();
+  else if(s==='books')renderBooks();
+  else if(s==='members')renderMembers();
+  else if(s==='issues')renderIssues();
+  else if(s==='fines')renderFines();
+  else if(s==='reports')renderReports();
+}
+
+function getMemberName(id){const m=members.find(x=>x.id===id);return m?m.fname+' '+m.lname:id;}
+function getBookTitle(acc){const b=books.find(x=>x.acc===acc);return b?b.title:acc;}
+function getMemberIssueCount(id){return issues.filter(i=>i.memberId===id&&!i.returned).length;}
+function initials(fname,lname){return((fname||'')[0]+(lname||'')[0]).toUpperCase();}
+function avail(b){return b.copies-b.issued;}
+
+function updateFineBadge(){
+  const count=fines.filter(f=>!f.paid).length;
+  const badge=document.getElementById('fine-nav-badge');
+  badge.textContent=count;
+  badge.style.display=count?'':'none';
+}
+
+function renderDashboard(){
+  const totalCopies=books.reduce((a,b)=>a+b.copies,0);
+  const issuedNow=issues.filter(i=>!i.returned).length;
+  const overdues=issues.filter(i=>!i.returned&&i.due<today());
+  const pendingFines=fines.filter(f=>!f.paid).reduce((a,f)=>a+f.amount,0);
+  document.getElementById('stat-grid').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Total Copies</div><div class="stat-value">${totalCopies}</div><div class="stat-sub">${books.length} unique titles</div></div>
+    <div class="stat-card"><div class="stat-label">Currently Issued</div><div class="stat-value">${issuedNow}</div><div class="stat-sub">${Math.round(issuedNow/totalCopies*100)}% utilisation</div></div>
+    <div class="stat-card"><div class="stat-label">Members</div><div class="stat-value">${members.length}</div><div class="stat-sub">${members.filter(m=>m.type==='Student').length} students</div></div>
+    <div class="stat-card"><div class="stat-label">Overdue</div><div class="stat-value" style="color:var(--color-text-danger)">${overdues.length}</div><div class="stat-sub">pending returns</div></div>
+    <div class="stat-card"><div class="stat-label">Fines Pending</div><div class="stat-value" style="color:var(--color-text-warning)">₹${pendingFines}</div><div class="stat-sub">${fines.filter(f=>!f.paid).length} records</div></div>
+  `;
+  document.getElementById('activity-log').innerHTML=activityLog.map(a=>`
+    <div class="activity-item">
+      <div class="activity-dot ${a.type}"></div>
+      <div><div class="activity-text">${a.text}</div><div class="activity-time">${a.time}</div></div>
+    </div>`).join('');
+  document.getElementById('overdue-count').textContent=overdues.length;
+  document.getElementById('overdue-table').innerHTML=overdues.length?overdues.map(i=>`
+    <tr>
+      <td>${getMemberName(i.memberId)}</td>
+      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${getBookTitle(i.bookAcc)}</td>
+      <td><span class="badge badge-danger">${i.due}</span></td>
+    </tr>`).join(''):'<tr><td colspan="3" class="empty-state">No overdue books ✓</td></tr>';
+  const cnt={};issues.forEach(i=>{cnt[i.bookAcc]=(cnt[i.bookAcc]||0)+1;});
+  const popular=books.slice().sort((a,b)=>(cnt[b.acc]||0)-(cnt[a.acc]||0)).slice(0,5);
+  document.getElementById('popular-table').innerHTML=popular.map(b=>`
+    <tr>
+      <td><div class="cell-title">${b.title}</div></td>
+      <td style="color:var(--color-text-secondary)">${b.author}</td>
+      <td><span class="badge badge-maroon">${b.genre}</span></td>
+      <td><strong style="font-weight:500">${cnt[b.acc]||0}</strong></td>
+    </tr>`).join('');
+}
+
+function renderBooks(){
+  const gf=document.getElementById('book-genre-filter').value;
+  const sf=document.getElementById('book-status-filter').value;
+  let list=books.filter(b=>(!gf||b.genre===gf)&&(!sf||(sf==='Available'?avail(b)>0:avail(b)<=0)));
+  document.getElementById('book-count-label').textContent=`${list.length} of ${books.length} titles`;
+  document.getElementById('books-table').innerHTML=list.length?list.map(b=>{
+    const a=avail(b);
+    return `<tr>
+      <td class="cell-mono">${b.acc}</td>
+      <td><div class="cell-title">${b.title}</div><div class="cell-sub">ISBN: ${b.isbn} · ${b.publisher}, ${b.year}</div></td>
+      <td style="color:var(--color-text-secondary)">${b.author}</td>
+      <td><span class="badge badge-info">${b.genre}</span></td>
+      <td><span class="badge ${a>0?'badge-success':'badge-danger'}">${a>0?'Available ('+a+')':'All Issued'}</span></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-sm" onclick="editBook('${b.acc}')">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteBook('${b.acc}')">Delete</button>
+      </td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="6" class="empty-state">No books found</td></tr>';
+}
+
+function renderMembers(){
+  const tf=document.getElementById('member-type-filter').value;
+  let list=members.filter(m=>!tf||m.type===tf);
+  document.getElementById('member-count-label').textContent=`${list.length} of ${members.length}`;
+  document.getElementById('members-table').innerHTML=list.length?list.map(m=>{
+    const cnt=getMemberIssueCount(m.id);
+    const limit=m.type==='Faculty'?5:m.type==='Student'?3:2;
+    const typeBadge=m.type==='Faculty'?'badge-info':m.type==='Student'?'badge-success':'badge-neutral';
+    return `<tr>
+      <td class="cell-mono">${m.id}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="member-avatar">${initials(m.fname,m.lname)}</div>
+          <div><div class="cell-title">${m.fname} ${m.lname}</div><div class="cell-sub">${m.email}</div></div>
+        </div>
+      </td>
+      <td><span class="badge ${typeBadge}">${m.type}</span></td>
+      <td style="color:var(--color-text-secondary)">${m.dept}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span>${cnt}/${limit}</span>
+          <div style="width:50px;height:4px;background:var(--color-background-secondary);border-radius:4px;overflow:hidden;">
+            <div style="width:${Math.round(cnt/limit*100)}%;height:100%;background:${cnt>=limit?'var(--color-text-danger)':'var(--maroon)'};border-radius:4px;"></div>
+          </div>
+        </div>
+      </td>
+      <td><span class="badge ${m.active?'badge-success':'badge-danger'}">${m.active?'Active':'Inactive'}</span></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-sm" onclick="editMember('${m.id}')">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteMember('${m.id}')">Remove</button>
+      </td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="7" class="empty-state">No members found</td></tr>';
+}
+
+function renderIssues(){
+  document.getElementById('member-list').innerHTML=members.map(m=>`<option value="${m.id}">${m.fname} ${m.lname}</option>`).join('');
+  document.getElementById('book-list').innerHTML=books.filter(b=>avail(b)>0).map(b=>`<option value="${b.acc}">${b.title}</option>`).join('');
+  document.getElementById('book-list2').innerHTML=issues.filter(i=>!i.returned).map(i=>`<option value="${i.bookAcc}">${getBookTitle(i.bookAcc)}</option>`).join('');
+  document.getElementById('return-book').oninput=function(){
+    const issue=issues.find(i=>i.bookAcc===this.value&&!i.returned);
+    if(issue){
+      const overdue=issue.due<today()?daysDiff(issue.due,today()):0;
+      document.getElementById('return-info').innerHTML=`Member: <strong style="font-weight:500">${getMemberName(issue.memberId)}</strong> · Due: ${issue.due}${overdue>0?` <span style="color:var(--color-text-danger)">· ⚠ ${overdue}d overdue — ₹${overdue*FINE_PER_DAY}</span>`:''}`;
+    }else{document.getElementById('return-info').textContent='';}
+  };
+  const active=issues.filter(i=>!i.returned);
+  document.getElementById('issue-count-label').textContent=`${active.length} active`;
+  document.getElementById('issues-table').innerHTML=active.length?active.map(i=>`
+    <tr>
+      <td class="cell-mono">${i.id}</td>
+      <td>${getMemberName(i.memberId)}</td>
+      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${getBookTitle(i.bookAcc)}</td>
+      <td style="color:var(--color-text-secondary)">${i.issued}</td>
+      <td style="color:var(--color-text-secondary)">${i.due}</td>
+      <td><span class="badge ${i.due<today()?'badge-danger':'badge-success'}">${i.due<today()?'Overdue':'On Time'}</span></td>
+    </tr>`).join(''):'<tr><td colspan="6" class="empty-state">No active issues</td></tr>';
+}
+
+function renderFines(){
+  const pending=fines.filter(f=>!f.paid);
+  const collected=fines.filter(f=>f.paid).reduce((a,f)=>a+f.amount,0);
+  document.getElementById('fine-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Pending Amount</div><div class="stat-value" style="color:var(--color-text-danger)">₹${pending.reduce((a,f)=>a+f.amount,0)}</div><div class="stat-sub">${pending.length} records</div></div>
+    <div class="stat-card"><div class="stat-label">Fine Rate</div><div class="stat-value">₹${FINE_PER_DAY}</div><div class="stat-sub">per overdue day</div></div>
+    <div class="stat-card"><div class="stat-label">Collected</div><div class="stat-value" style="color:var(--color-text-success)">₹${collected}</div><div class="stat-sub">this session</div></div>
+  `;
+  document.getElementById('fines-table').innerHTML=fines.length?fines.map(f=>`
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="member-avatar" style="width:26px;height:26px;font-size:10px;">${initials(...getMemberName(f.memberId).split(' '))}</div>
+          ${getMemberName(f.memberId)}
+        </div>
+      </td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${getBookTitle(f.bookAcc)}</td>
+      <td><span class="badge badge-warning">${f.daysOverdue} days</span></td>
+      <td><strong style="font-weight:500">₹${f.amount}</strong></td>
+      <td><span class="badge ${f.paid?'badge-success':'badge-danger'}">${f.paid?'Paid':'Pending'}</span></td>
+      <td>${!f.paid?`<button class="btn btn-sm btn-success" onclick="collectFine('${f.id}')">Collect ₹${f.amount}</button>`:'-'}</td>
+    </tr>`).join(''):'<tr><td colspan="6" class="empty-state">No fines recorded</td></tr>';
+  updateFineBadge();
+}
+
+function renderReports(){
+  const totalCopies=books.reduce((a,b)=>a+b.copies,0);
+  const issuedNow=issues.filter(i=>!i.returned).length;
+  document.getElementById('report-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Unique Titles</div><div class="stat-value">${books.length}</div><div class="stat-sub">in catalogue</div></div>
+    <div class="stat-card"><div class="stat-label">Total Copies</div><div class="stat-value">${totalCopies}</div><div class="stat-sub">in collection</div></div>
+    <div class="stat-card"><div class="stat-label">Utilisation</div><div class="stat-value">${Math.round(issuedNow/totalCopies*100)}%</div><div class="stat-sub">copies out now</div></div>
+    <div class="stat-card"><div class="stat-label">Total Issues</div><div class="stat-value">${issues.length}</div><div class="stat-sub">all time</div></div>
+  `;
+  const genres={};books.forEach(b=>{genres[b.genre]=(genres[b.genre]||0)+b.copies;});
+  const maxG=Math.max(...Object.values(genres));
+  document.getElementById('genre-dist').innerHTML=Object.entries(genres).sort((a,b)=>b[1]-a[1]).map(([g,c])=>`
+    <div class="bar-wrap">
+      <div class="bar-label"><span>${g}</span><span>${c} copies</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(c/maxG*100)}%;background:var(--maroon);"></div></div>
+    </div>`).join('');
+  const types={Student:0,Faculty:0,Staff:0};members.forEach(m=>types[m.type]++);
+  const tColors={Student:'var(--maroon)',Faculty:'#C89B3C',Staff:'#378ADD'};
+  document.getElementById('member-dist').innerHTML=Object.entries(types).map(([t,c])=>`
+    <div class="bar-wrap">
+      <div class="bar-label"><span>${t}</span><span>${c} members</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(c/members.length*100)}%;background:${tColors[t]};"></div></div>
+    </div>`).join('');
+  const histData=[
+    {date:daysAgo(6),issues:3,returns:2,fines:4},{date:daysAgo(5),issues:5,returns:3,fines:0},
+    {date:daysAgo(4),issues:2,returns:4,fines:6},{date:daysAgo(3),issues:4,returns:1,fines:0},
+    {date:daysAgo(2),issues:6,returns:5,fines:2},{date:daysAgo(1),issues:3,returns:4,fines:0},
+    {date:today(),issues:1,returns:1,fines:10},
+  ];
+  document.getElementById('history-table').innerHTML=histData.map(h=>`
+    <tr><td style="color:var(--color-text-secondary)">${h.date}</td><td><strong style="font-weight:500">${h.issues}</strong></td><td><strong style="font-weight:500">${h.returns}</strong></td><td>₹${h.fines}</td></tr>`).join('');
+}
+
+function issueBook(){
+  const mid=document.getElementById('issue-member').value.trim();
+  const acc=document.getElementById('issue-book').value.trim();
+  const member=members.find(m=>m.id===mid);
+  const book=books.find(b=>b.acc===acc);
+  if(!member)return toast('Member not found','danger');
+  if(!book)return toast('Book not found','danger');
+  if(avail(book)<=0)return toast('No copies available','danger');
+  const limit=member.type==='Faculty'?5:member.type==='Student'?3:2;
+  if(getMemberIssueCount(mid)>=limit)return toast(`Issue limit reached (${limit} books)`,'danger');
+  const loanDays=LOAN_DAYS[member.type];
+  const issueId='ISS-'+String(issues.length+1).padStart(3,'0');
+  issues.push({id:issueId,memberId:mid,bookAcc:acc,issued:today(),due:daysFromNow(loanDays),returned:null});
+  book.issued++;
+  activityLog.unshift({type:'issue',text:`${acc} issued to ${member.fname} ${member.lname}`,time:'Just now'});
+  if(activityLog.length>10)activityLog.pop();
+  document.getElementById('issue-member').value='';
+  document.getElementById('issue-book').value='';
+  toast(`Issued! Due in ${loanDays} days (${daysFromNow(loanDays)})`,'success');
+  renderIssues();
+}
+
+function returnBook(){
+  const acc=document.getElementById('return-book').value.trim();
+  const issue=issues.find(i=>i.bookAcc===acc&&!i.returned);
+  if(!issue)return toast('No active issue for this book','danger');
+  issue.returned=today();
+  const book=books.find(b=>b.acc===acc);
+  if(book)book.issued=Math.max(0,book.issued-1);
+  const member=members.find(m=>m.id===issue.memberId);
+  const overdue=issue.due<today()?daysDiff(issue.due,today()):0;
+  if(overdue>0){
+    const fineAmt=overdue*FINE_PER_DAY;
+    fines.push({id:'FIN-'+String(fines.length+1).padStart(3,'0'),issueId:issue.id,memberId:issue.memberId,bookAcc:acc,daysOverdue:overdue,amount:fineAmt,paid:false});
+    activityLog.unshift({type:'fine',text:`Fine ₹${fineAmt} raised for ${member?member.fname+' '+member.lname:issue.memberId}`,time:'Just now'});
+    toast(`Returned with fine: ₹${fineAmt} (${overdue} days overdue)`,'warning');
+  }else{
+    activityLog.unshift({type:'return',text:`${acc} returned by ${member?member.fname+' '+member.lname:issue.memberId}`,time:'Just now'});
+    toast('Book returned successfully!','success');
+  }
+  if(activityLog.length>10)activityLog.pop();
+  document.getElementById('return-book').value='';
+  document.getElementById('return-info').textContent='';
+  renderIssues();updateFineBadge();
+}
+
+function collectFine(fid){
+  const fine=fines.find(f=>f.id===fid);
+  if(fine){fine.paid=true;toast(`₹${fine.amount} collected`,'success');renderFines();}
+}
+
+function openBookModal(acc){
+  editingBook=acc||null;
+  document.getElementById('book-modal-title').textContent=acc?'Edit Book':'Add New Book';
+  if(acc){const b=books.find(x=>x.acc===acc);document.getElementById('bk-acc').value=b.acc;document.getElementById('bk-isbn').value=b.isbn;document.getElementById('bk-title').value=b.title;document.getElementById('bk-author').value=b.author;document.getElementById('bk-genre').value=b.genre;document.getElementById('bk-year').value=b.year;document.getElementById('bk-pub').value=b.publisher;document.getElementById('bk-copies').value=b.copies;}
+  else{['bk-acc','bk-isbn','bk-title','bk-author','bk-year','bk-pub'].forEach(id=>document.getElementById(id).value='');document.getElementById('bk-copies').value=1;}
+  document.getElementById('book-modal').classList.add('open');
+}
+function editBook(acc){openBookModal(acc);}
+function deleteBook(acc){
+  if(issues.some(i=>i.bookAcc===acc&&!i.returned))return toast('Cannot delete — book is currently issued','danger');
+  books=books.filter(b=>b.acc!==acc);toast('Book removed','success');renderBooks();
+}
+function saveBook(){
+  const acc=document.getElementById('bk-acc').value.trim();
+  if(!acc)return toast('Accession number required','danger');
+  const data={acc,isbn:document.getElementById('bk-isbn').value,title:document.getElementById('bk-title').value,author:document.getElementById('bk-author').value,genre:document.getElementById('bk-genre').value,year:+document.getElementById('bk-year').value,publisher:document.getElementById('bk-pub').value,copies:+document.getElementById('bk-copies').value,issued:0};
+  if(editingBook){const idx=books.findIndex(b=>b.acc===editingBook);if(idx>=0){data.issued=books[idx].issued;books[idx]=data;}}
+  else{if(books.find(b=>b.acc===acc))return toast('Accession number already exists','danger');books.push(data);activityLog.unshift({type:'add',text:`New book "${data.title}" (${acc}) added`,time:'Just now'});}
+  closeModal('book-modal');toast('Book saved!','success');renderBooks();
+}
+
+function openMemberModal(id){
+  editingMember=id||null;
+  document.getElementById('member-modal-title').textContent=id?'Edit Member':'Add New Member';
+  if(id){const m=members.find(x=>x.id===id);document.getElementById('mb-id').value=m.id;document.getElementById('mb-type').value=m.type;document.getElementById('mb-fname').value=m.fname;document.getElementById('mb-lname').value=m.lname;document.getElementById('mb-dept').value=m.dept;document.getElementById('mb-email').value=m.email;document.getElementById('mb-phone').value=m.phone;}
+  else{['mb-id','mb-fname','mb-lname','mb-email','mb-phone'].forEach(i=>document.getElementById(i).value='');}
+  document.getElementById('member-modal').classList.add('open');
+}
+function editMember(id){openMemberModal(id);}
+function deleteMember(id){
+  if(issues.some(i=>i.memberId===id&&!i.returned))return toast('Cannot remove — member has active issues','danger');
+  members=members.filter(m=>m.id!==id);toast('Member removed','success');renderMembers();
+}
+function saveMember(){
+  const id=document.getElementById('mb-id').value.trim();
+  if(!id)return toast('Member ID required','danger');
+  const data={id,type:document.getElementById('mb-type').value,fname:document.getElementById('mb-fname').value,lname:document.getElementById('mb-lname').value,dept:document.getElementById('mb-dept').value,email:document.getElementById('mb-email').value,phone:document.getElementById('mb-phone').value,active:true};
+  if(editingMember){const idx=members.findIndex(m=>m.id===editingMember);if(idx>=0)members[idx]=data;}
+  else{if(members.find(m=>m.id===id))return toast('Member ID already exists','danger');members.push(data);}
+  closeModal('member-modal');toast('Member saved!','success');renderMembers();
+}
+
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function outsideClose(e,id){if(e.target===document.getElementById(id))closeModal(id);}
+
+function globalSearch(q){
+  if(!q)return;q=q.toLowerCase();
+  if(books.find(b=>b.title.toLowerCase().includes(q)||b.acc.toLowerCase().includes(q)))navigate('books');
+  else if(members.find(m=>(m.fname+' '+m.lname).toLowerCase().includes(q)||m.id.toLowerCase().includes(q)))navigate('members');
+}
+
+function toast(msg,type='success'){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className=`toast toast-${type} show`;
+  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+updateFineBadge();
+renderDashboard();
+</script>
+</body>
+</html>
